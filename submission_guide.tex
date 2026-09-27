@@ -1,0 +1,175 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{microtype}
+
+% Brand palette
+\definecolor{marshnavy}{HTML}{002664}
+\definecolor{marshblue}{HTML}{0072CE}
+\definecolor{marshsky}{HTML}{00A3E0}
+\definecolor{marshdark}{HTML}{0F172A}
+\definecolor{codebg}{HTML}{F1F5F9}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=marshnavy,
+    urlcolor=marshblue,
+    citecolor=marshnavy
+}
+
+\titleformat{\section}{\Large\bfseries\color{marshnavy}}{}{0em}{}[\vspace{0.2em}\titlerule]
+\titleformat{\subsection}{\large\bfseries\color{marshblue}}{}{0em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{marshdark}}{}{0em}{}
+
+\setlist[itemize]{leftmargin=1.5em, itemsep=0.2em, topsep=0.3em}
+\setlist[enumerate]{leftmargin=1.5em, itemsep=0.2em, topsep=0.3em}
+
+\title{\textbf{\LARGE Marsh Pitch Generator: Execution Guide}\\[0.4em]
+\large Setup, Configuration \& Submission Walkthrough}
+
+\author{
+    \textbf{\Large Yash Garg} \\[0.2em]
+    BTech AI \\
+    Mukesh Patel School of Technology Management, NMIMS Mumbai \\[0.4em]
+    \textbf{Repository:} \href{https://github.com/yashgarg195/marsh-case-study}{\url{https://github.com/yashgarg195/marsh-case-study}} \\[0.3em]
+    \textit{Marsh McLennan Internship Case Study Submission}
+}
+\date{September 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This guide provides complete instructions for executing and evaluating the \textbf{Marsh Pitch Generator} submission. The package includes an executive single-page web studio powered by FastAPI, an automated factual audit engine, dynamic policy PDF upload, on-demand PowerPoint deck generation, and an official ReportLab compliance audit report generator.
+\end{abstract}
+
+\vspace{0.5em}
+
+% ---------------------------------------------------------------------------
+\section{API Key Configuration for Evaluation}
+% ---------------------------------------------------------------------------
+
+To ensure a seamless, zero-friction evaluation experience, an active Google Gemini API key has been pre-configured directly in the root directory:
+
+\begin{itemize}
+    \item \textbf{Pre-configured in ZIP Package (Recommended):} The included root \texttt{.env} file already contains the working API key:
+    \begin{verbatim}
+    GEMINI_API_KEY=your_gemini_api_key_here
+    \end{verbatim}
+    The application will automatically detect and load this key on startup via \texttt{python-dotenv}. No manual key setup is required.
+    \item \textbf{Using Your Own API Key (Optional Alternative):} If you prefer to evaluate with an alternative Gemini key, simply edit the root \texttt{.env} file or export it directly in your terminal:
+    \begin{verbatim}
+    export GEMINI_API_KEY="AIzaSy..."
+    \end{verbatim}
+\end{itemize}
+
+% ---------------------------------------------------------------------------
+\section{Quick-Start Execution (3 Steps)}
+% ---------------------------------------------------------------------------
+
+\subsection*{Prerequisites}
+\begin{itemize}
+    \item Python 3.10, 3.11, 3.12, or 3.13 installed.
+    \item Internet connectivity (for live Wikipedia entity grounding and Gemini flash API calls).
+\end{itemize}
+
+\subsection*{Step 1: Extract and Navigate}
+Unzip the submission archive and enter the root directory:
+\begin{verbatim}
+unzip marsh-case-study.zip
+cd marsh-case-study
+\end{verbatim}
+
+\subsection*{Step 2: Create a Virtual Environment \& Install Dependencies}
+Create an isolated Python environment and install the required libraries:
+\begin{verbatim}
+# macOS / Linux
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Windows (Command Prompt / PowerShell)
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+\end{verbatim}
+
+\subsection*{Step 3: Launch the Application Studio}
+Start the high-performance FastAPI server:
+\begin{verbatim}
+python3 server.py
+\end{verbatim}
+Open your web browser and navigate to:
+\begin{center}
+\textbf{\url{http://localhost:8000}}
+\end{center}
+
+\textit{Note: An alternative Streamlit interface is also provided in \texttt{app.py} and can be run via \texttt{streamlit run app.py}.}
+
+% ---------------------------------------------------------------------------
+\section{Application Walkthrough \& Core Features}
+% ---------------------------------------------------------------------------
+
+The web application is structured for executive evaluation across the following workflow:
+
+\begin{enumerate}
+    \item \textbf{Client Target Specification:}
+    \begin{itemize}
+        \item Enter any target corporation (e.g., \textit{Infosys}, \textit{Tata Consultancy Services}, \textit{Zomato}, or \textit{Dr. Reddy's Laboratories}), or click one of the quick preset buttons.
+        \item The platform automatically queries the public Wikipedia REST API, fetches verified business descriptions and scale, and uses Gemini 3.5 Flash-Lite to infer healthcare risk dynamics with documented assumption tracking.
+    \end{itemize}
+
+    \item \textbf{Policy Baseline Selection \& Dynamic PDF Upload:}
+    \begin{itemize}
+        \item The 4 IRDAI approved brochures (\textit{Aditya Birla}, \textit{Care Health}, \textit{HDFC ERGO}, and \textit{Niva Bupa}) are pre-indexed into 237 semantic section clauses.
+        \item Advisors can select which policies to ground the pitch in using the always-visible scrollable checklist.
+        \item \textbf{Dynamic Upload:} You may drag-and-drop any new insurance policy PDF into the upload zone; it is parsed, chunked, and indexed into the active policy baseline in real time.
+    \end{itemize}
+
+    \item \textbf{Pipeline Execution (3 Steps):}
+    \begin{itemize}
+        \item Click \textbf{"Generate Grounded Pitch \& Run Audit"}.
+        \item The progress stepper guides you through: \texttt{1. Client Risk Profile} $\rightarrow$ \texttt{2. Pitch Synthesis} $\rightarrow$ \texttt{3. Two-Step Factual Audit}.
+    \end{itemize}
+
+    \item \textbf{Results Workspace:}
+    \begin{itemize}
+        \item \textbf{Slide Deck Preview:} Interactive presentation carousel displaying synthesized slides, key benefit callouts, and real commercial insurer brandings.
+        \item \textbf{Compliance \& Audit Report Tab:} Displays the overall audit status (\texttt{PASS}, \texttt{NEEDS REVIEW}, \texttt{FAIL}), confidence score, verified claim count, and an interactive traceability log. Click any cited clause tag to open the \textbf{Clause Inspector Modal} and view the exact source text from the policy filing.
+        \item \textbf{Company Risk Profile Tab:} Inspects workforce demographics, inferred exposures, and documented assumptions.
+    \end{itemize}
+
+    \item \textbf{On-Demand (Lazy) Deliverables Export:}
+    \begin{itemize}
+        \item \textbf{Download Pitch Deck (.pptx):} Compiles an executive 16:9 presentation deck adhering to consulting editorial typography (clean slides, no internal clause tags, no footers).
+        \item \textbf{Download Audit Report (.pdf):} Compiles an official multi-page ReportLab compliance document featuring executive KPI summaries, the full claim-to-clause verification matrix, and an advisor sign-off block.
+    \end{itemize}
+\end{enumerate}
+
+% ---------------------------------------------------------------------------
+\section{Troubleshooting \& Operational Notes}
+% ---------------------------------------------------------------------------
+
+\begin{table}[h!]
+\centering
+\small
+\begin{tabularx}{\textwidth}{@{}l X@{}}
+\toprule
+\textbf{Issue / Observation} & \textbf{Resolution / Explanation} \\ \midrule
+\textbf{Port 8000 in use} & Run on an alternative port: \texttt{PORT=8080 python3 server.py} \\
+\textbf{Cache refresh} & If changes do not reflect, perform a hard refresh in your browser (\texttt{Cmd+Shift+R} on Mac, \texttt{Ctrl+F5} on Windows). \\
+\textbf{Rate limits} & Uses \texttt{gemini-3.5-flash-lite} with exponential backoff retries to operate smoothly within standard free-tier quotas. \\
+\textbf{Storage cleanliness} & The application generates deliverable files on-demand directly via in-memory binary blobs, avoiding disk bloat. \\ \bottomrule
+\end{tabularx}
+\end{table}
+
+\end{document}
