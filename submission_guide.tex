@@ -2,7 +2,7 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[margin=0.75in]{geometry}
+\usepackage[margin=0.7in]{geometry}
 \usepackage{hyperref}
 \usepackage{xcolor}
 \usepackage{enumitem}
@@ -16,12 +16,12 @@
 \hypersetup{colorlinks=true, linkcolor=marshnavy, urlcolor=marshblue}
 
 \titleformat{\section}{\large\bfseries\color{marshnavy}}{}{0em}{}[\vspace{0.1em}\titlerule]
-\titlespacing*{\section}{0pt}{8pt}{3pt}
+\titlespacing*{\section}{0pt}{7pt}{2pt}
 
 \setlist[enumerate]{leftmargin=1.5em, itemsep=1.5pt, topsep=1.5pt}
 \setlist[itemize]{leftmargin=1.2em, itemsep=1pt, topsep=1pt}
 
-\title{\vspace{-1.2cm}\textbf{\Large Marsh Pitch Generator: Quick Execution Guide}\\[0.2em]
+\title{\vspace{-1.4cm}\textbf{\Large Marsh Pitch Generator: Execution Guide}\\[0.2em]
 \normalsize Step-by-Step Setup \& Run Instructions}
 
 \author{
@@ -35,54 +35,56 @@
 \maketitle
 \vspace{-0.6cm}
 
-\section*{1. Gemini API Key Configuration}
-An active Google Gemini API key is already configured for evaluation:
+\section*{1. Submission Directory Navigation}
+The submission ZIP contains documentation PDFs alongside the project codebase folder:
+\begin{verbatim}
+unzip marsh-submission.zip
+cd marsh-submission/project       # Enter the inner project codebase directory
+\end{verbatim}
+
+\section*{2. Gemini API Key Configuration}
+An active Google Gemini API key is required for LLM reasoning and entity synthesis:
 \begin{itemize}
-    \item \textbf{Pre-configured in ZIP Package:} The included \texttt{.env} file already contains an active \texttt{GEMINI\_API\_KEY}. The app loads it automatically on startup with zero manual configuration.
-    \item \textbf{Alternative Key (Optional):} To evaluate with a different key, edit \texttt{.env} or run \texttt{export GEMINI\_API\_KEY="your\_key"} in terminal.
+    \item \textbf{Pre-configured in ZIP Package:} The \texttt{project/} directory includes a pre-configured \texttt{.env} file containing an active API key. The application loads it automatically on startup.
+    \item \textbf{Command to Set Key (Just in case):} If the \texttt{.env} file is missing or you wish to provide your own key, run either command in the \texttt{project/} directory:
+\begin{verbatim}
+echo 'GEMINI_API_KEY="your_api_key_here"' > .env
+# OR export directly in your shell:
+export GEMINI_API_KEY="your_api_key_here"
+\end{verbatim}
 \end{itemize}
 
-\section*{2. Environment Setup \& Installation}
-Requires Python 3.10+ and internet access (for Wikipedia retrieval \& Gemini API).
+\section*{3. Environment Setup \& Installation}
+Requires Python 3.10+ and internet access (for Wikipedia retrieval \& Gemini API calls).
 \begin{enumerate}
-    \item \textbf{Extract ZIP and enter directory:}
-\begin{verbatim}
-unzip marsh-case-study.zip && cd marsh-case-study
-\end{verbatim}
-    \item \textbf{Create and activate virtual environment:}
+    \item \textbf{Create and activate a virtual environment:}
 \begin{verbatim}
 python3 -m venv venv
 source venv/bin/activate          # On Windows: venv\Scripts\activate
 \end{verbatim}
-    \item \textbf{Install required packages:}
+    \item \textbf{Install required dependencies:}
 \begin{verbatim}
 pip install -r requirements.txt
 \end{verbatim}
 \end{enumerate}
 
-\section*{3. Launching the Application}
+\section*{4. Launching the Web Studio}
 \begin{enumerate}
-    \item \textbf{Start the web studio:}
+    \item \textbf{Start the application server:}
 \begin{verbatim}
 python3 server.py
 \end{verbatim}
-    \item \textbf{Open browser:} Navigate to \href{http://localhost:8000}{\textbf{\texttt{http://localhost:8000}}}
-    \item \textit{(Alternative Streamlit UI):} Can also be run via \texttt{streamlit run app.py}
+    \item \textbf{Open your browser:} Navigate to \href{http://localhost:8000}{\textbf{\texttt{http://localhost:8000}}}
+    \item \textit{(Alternative Streamlit UI):} Can also be launched via \texttt{streamlit run app.py}
 \end{enumerate}
 
-\section*{4. Generating a Pitch \& Running the Audit}
+\section*{5. Quick Evaluation Workflow}
 \begin{enumerate}
-    \item \textbf{Select Target Company:} Enter a company name (e.g., \textit{Infosys}, \textit{Zomato}, \textit{TCS}) or click a preset.
-    \item \textbf{Select Policies:} 4 IRDAI policy brochures are pre-selected. Optionally drag-and-drop a new policy PDF to index dynamically.
-    \item \textbf{Execute Pipeline:} Click \textbf{"Generate Grounded Pitch \& Run Audit"}. The 3-step pipeline profiles the client via Wikipedia, synthesizes slides, and runs a two-step factual audit.
+    \item \textbf{Select Target Entity:} Type any company (e.g., \textit{Infosys}, \textit{Zomato}, \textit{TCS}) or click a preset button.
+    \item \textbf{Policy Baseline:} The 4 IRDAI approved brochures are pre-indexed. You may also drag-and-drop any new policy PDF into the upload zone to chunk and index dynamically.
+    \item \textbf{Run Pipeline:} Click \textbf{"Generate Grounded Pitch \& Run Audit"}. The 3-step pipeline profiles the client via Wikipedia, synthesizes slides, and executes a two-step factual audit.
+    \item \textbf{Audit \& Clause Inspector:} In the \textbf{Compliance \& Audit} tab, view the audit score (PASS/FAIL) and click any clause tag to open the \textbf{Clause Inspector Modal} with original source text.
+    \item \textbf{Download Deliverables:} Click \textbf{"Download Pitch Deck (.pptx)"} and \textbf{"Download Audit Report (.pdf)"} to render and download both files on demand.
 \end{enumerate}
-
-\section*{5. Reviewing \& Exporting Deliverables}
-\begin{itemize}
-    \item \textbf{Slide Deck Preview:} Browse the interactive presentation carousel with commercial insurer brandings.
-    \item \textbf{Compliance \& Audit Tab:} View audit status (PASS/FAIL), confidence score, and click any clause tag to open the \textbf{Clause Inspector Modal} to view the exact original filing text.
-    \item \textbf{Download Presentation (.pptx):} Click \textbf{"Download Pitch Deck (.pptx)"} to render and download the executive slide deck on demand.
-    \item \textbf{Download Audit Report (.pdf):} Click \textbf{"Download Audit Report (.pdf)"} to render and download the official compliance traceability report.
-\end{itemize}
 
 \end{document}
