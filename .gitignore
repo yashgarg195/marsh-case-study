@@ -1,0 +1,42 @@
+# Environment & Secret files
+.env
+.env.*
+!.env.example
+
+# Agent handoffs & Internal AI logs
+agent-context/
+.system_generated/
+.user_uploaded/
+.agents/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Data caches & Generated exports
+*.pptx
+chunks.json
+exports/*
+!exports/.gitkeep
+test_*.json
+test_*.pdf
+*.textClipping
+
+# Duplicate / OS specific files
+Policy Documents/
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

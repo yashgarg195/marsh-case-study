@@ -1,0 +1,143 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{microtype}
+
+% Color definitions aligned with Marsh McLennan brand identity
+\definecolor{marshnavy}{HTML}{002664}
+\definecolor{marshblue}{HTML}{0072CE}
+\definecolor{marshsky}{HTML}{00A3E0}
+\definecolor{marshdark}{HTML}{0F172A}
+\definecolor{slateborder}{HTML}{E2E8F0}
+\definecolor{cardbg}{HTML}{F8FAFC}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=marshnavy,
+    urlcolor=marshblue,
+    citecolor=marshnavy
+}
+
+\titleformat{\section}{\Large\bfseries\color{marshnavy}}{}{0em}{}[\vspace{0.2em}\titlerule]
+\titleformat{\subsection}{\large\bfseries\color{marshblue}}{}{0em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{marshdark}}{}{0em}{}
+
+\setlist[itemize]{leftmargin=1.5em, itemsep=0.2em, topsep=0.3em}
+\setlist[enumerate]{leftmargin=1.5em, itemsep=0.2em, topsep=0.3em}
+
+\title{\textbf{\LARGE Marsh Pitch Generator: System Summary}\\[0.4em]
+\large AI-Grounded Presentation Synthesis, Factual Auditing \& Compliance Architecture}
+\author{\textbf{Marsh McLennan Internship Case Study}}
+\date{September 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+The \textbf{Marsh Pitch Generator} is an executive-grade AI advisory application that automates the synthesis of customized corporate insurance marketing pitch decks. Grounded in IRDAI-approved health insurance policy filings and verified public corporate records, the system enforces a zero-hallucination compliance standard via an automated two-step factual verification engine. This document provides a technical summary of the engineering approach, tooling choices, end-to-end architecture, and key design decisions implemented in the platform.
+\end{abstract}
+
+\vspace{0.8em}
+
+% ---------------------------------------------------------------------------
+\section{Approach \& Methodology}
+% ---------------------------------------------------------------------------
+
+Corporate insurance advisory requires synthesizing complex policy brochures into persuasive, client-specific marketing decks while maintaining strict regulatory veracity. The platform approaches this challenge through four foundational tenets:
+
+\begin{enumerate}
+    \item \textbf{Dual-Source Grounding:} Separates client corporate context from insurance benefit claims. Entity demographics and operational exposures are grounded via the public \textbf{Wikipedia REST API} (avoiding hallucinated corporate facts), while policy benefits, waiting periods, and sums insured are bound to parsed IRDAI policy filings.
+    \item \textbf{Explicit Assumption Transparency (Zero Silent Hallucination):} When an unlisted, newly formed, or fictitious entity is queried, the model is strictly forbidden from guessing. It must explicitly tag every inferred parameter with \texttt{assumed: true} and provide a documented justification.
+    \item \textbf{Deterministic Two-Step Factual Audit:} To guarantee compliance without incurring excessive LLM inference latency or cost, every benefit claim undergoes a rapid fuzzy string distance evaluation (\textit{RapidFuzz}), escalating to targeted LLM reasoning (\textit{Gemini 3.5 Flash-Lite}) only when string similarity falls into an inconclusive band.
+    \item \textbf{Separation of Presentation \& Compliance Deliverables:} Executive presentation decks (\texttt{.pptx}) are kept clean, elegant, and free of internal database clause tags. A dedicated multi-page Compliance \& Audit Report (\texttt{.pdf}) provides full claim-by-clause traceability and broker sign-off workflows.
+    \item \textbf{On-Demand (Lazy) Generation with Direct Blob Streaming:} Pitch deck presentations and audit reports are never written prematurely to disk; they are compiled in milliseconds on-demand upon clicking download, streaming directly into in-memory browser blobs to eliminate 404 or navigation failures.
+\end{enumerate}
+
+% ---------------------------------------------------------------------------
+\section{Tools \& Libraries}
+% ---------------------------------------------------------------------------
+
+The stack is designed for minimal operational complexity, native local execution without Node.js/npm dependencies, and robust type safety:
+
+\begin{table}[h!]
+\centering
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Component} & \textbf{Library / Technology} & \textbf{Technical Purpose} \\ \midrule
+\textbf{Backend Framework} & FastAPI + Uvicorn & Async REST API serving, CORS handling, and file streaming \\
+\textbf{LLM Engine} & Google Generative AI SDK & Structured JSON generation via \texttt{gemini-3.5-flash-lite} \\
+\textbf{Corporate Grounding} & Wikipedia REST API & Keyless real-time retrieval of corporate overview \& headcount \\
+\textbf{PDF Document Ingestion} & pdfplumber ($\ge 0.11$) & Exact text \& layout extraction from IRDAI brochure PDFs \\
+\textbf{Fuzzy Verification} & RapidFuzz ($\ge 3.9$) & Token sort \& partial ratio string similarity computation \\
+\textbf{Presentation Export} & python-pptx ($\ge 1.0$) & Dynamic 16:9 widescreen corporate slide deck compilation \\
+\textbf{Compliance Audit Export} & ReportLab ($\ge 4.2$) & Multi-page tabular compliance matrix \& executive PDF generation \\
+\textbf{Schema Validation} & Pydantic (v2) + JSONSchema & Strict response schema enforcement and retry handling \\
+\textbf{Frontend Architecture} & Tailwind CSS + Vanilla ES6 & Responsive UI, custom scrollbars, Lucide icons \& carousel \\ \bottomrule
+\end{tabular}
+\end{table}
+
+% ---------------------------------------------------------------------------
+\section{System Architecture}
+% ---------------------------------------------------------------------------
+
+The application follows an asynchronous client-server pipeline orchestrated through five core stages:
+
+\begin{figure}[h!]
+\centering
+\small
+\begin{verbatim}
+[Client Query] ──▶ 1. Entity Profiling (Wikipedia REST API + Gemini Fallback)
+                          │
+                          ▼
+                   2. Policy Baseline Indexing (pdfplumber Heading Chunks)
+                          │
+                          ▼
+                   3. Pitch Deck Synthesis (Strict source_chunk_id Tagging)
+                          │
+                          ▼
+                   4. Two-Step Factual Audit Gate (RapidFuzz + LLM Escalation)
+                          │
+                          ▼
+                   5. On-Demand Lazy Downloads (Direct In-Memory Blob Streaming)
+                        ├──▶ PowerPoint Presentation (.pptx)
+                        └──▶ Compliance Audit Report (.pdf)
+\end{verbatim}
+\end{figure}
+
+\begin{enumerate}
+    \item \textbf{Ingestion \& Indexing Engine (\texttt{parse\_policy\_docs.py}):} Extracts text from baseline brochures (\textit{Aditya Birla Activ One}, \textit{Care Health Advantage}, \textit{HDFC ERGO Optima Secure+}, and \textit{Niva Bupa ReAssure 2.0}), chunking content by semantic section headings into \texttt{chunks.json}. Supports dynamic runtime drag-and-drop PDF uploads via \texttt{/api/upload-policy}.
+    \item \textbf{Corporate Profiling Module (\texttt{generate\_company\_profile.py}):} Queries the Wikipedia search API. Applies a string similarity filter ($\text{token\_set\_ratio} \ge 60$) to filter spurious hits. Passes verified corporate context to Gemini 3.5 Flash-Lite to infer headcount, industry classification, and corporate health risk exposures.
+    \item \textbf{Pitch Deck Generator (\texttt{generate\_marketing\_pitch.py}):} Synthesizes an executive 3--5 slide pitch mapped to the client's exposures. Every bullet detailing coverage terms must cite a valid \texttt{source\_chunk\_id}; unsourced claims are set to \texttt{null}. Replaces raw PDF filenames with commercial insurer names.
+    \item \textbf{Two-Step Audit Engine (\texttt{audit\_pitch\_content.py}):} Computes the claim confidence score:
+    \begin{equation*}
+        \text{Confidence Score} = \frac{\text{Verified Policy Claims}}{\text{Total Sourced Policy Claims}}
+    \end{equation*}
+    \begin{itemize}
+        \item \textbf{Step A (Fast-Path):} RapidFuzz compares claim text against cited clause text. A score $\ge 60$ passes immediately; $<30$ fails as unsupported.
+        \item \textbf{Step B (LLM Escalation):} Scores between $30$ and $59$ escalate to Gemini for natural language semantic verification with exponential backoff retry.
+    \end{itemize}
+    \item \textbf{Presentation \& Report Renderers (\texttt{render\_pptx.py}, \texttt{render\_audit\_pdf.py}):} Render output files on demand upon user button interaction.
+\end{enumerate}
+
+% ---------------------------------------------------------------------------
+\section{Key Design Decisions \& Trade-offs}
+% ---------------------------------------------------------------------------
+
+\begin{itemize}
+    \item \textbf{Heading-Based Semantic Chunking vs. Fixed-Size Sliding Windows:} Insurance contracts exhibit clear thematic boundaries (\textit{Waiting Periods}, \textit{Room Rent Limits}, \textit{Pre-Existing Disease Waiting Period}). Fixed-token chunking splits critical clauses across arbitrary boundaries, corrupting context. Heuristic heading chunking retains legal coherence.
+    \item \textbf{Fuzzy-First Audit Tiering:} Evaluating every claim through an LLM introduces rate limit bottlenecks and API latency. Using RapidFuzz as a primary filter resolves 65--80\% of claims deterministically in under 5 milliseconds, preserving LLM quota for nuanced phrasing.
+    \item \textbf{Separation of Context Slides from Policy Filings:} Policy brochures naturally never mention client enterprise names (\textit{Infosys}, \textit{Zomato}). Early prototypes failed audits because the model checked if the policy brochure proved the client's name. Slides 1 and 2 are categorized as \textit{Client Demographics / Strategic Advisory}, exempting them from policy clause matching while holding Slides 3--5 to 100\% factual verification.
+    \item \textbf{Editorial Presentation Aesthetics over Boxy Containers:} Rather than cluttering client slides with internal database clause codes (e.g. \texttt{abhi\_product\_brochure\_31}) and boxy card containers, presentation slides adhere to consulting standards: bold index numbers, generous whitespace, and clean sans-serif typography. Traceability is routed exclusively to the Audit Report PDF.
+    \item \textbf{On-Demand File Generation \& Direct Blob Streaming:} Eagerly saving presentations to disk during generation created uncollected disk clutter and browser 404 race conditions. Generating deliverables on demand via in-memory binary blobs guarantees instantaneous, reliable downloads.
+\end{itemize}
+
+\end{document}

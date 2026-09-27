@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Marsh Pitch Generator | Executive Advisory Studio</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            marsh: {
+              navy: '#002664',
+              blue: '#0072CE',
+              sky: '#00A3E0',
+              ice: '#F4F7FC',
+              border: '#E2E8F0',
+              dark: '#0F172A'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; }
+    .slide-card { transition: all 0.2s ease-in-out; }
+    .slide-card:hover { transform: translateY(-2px); }
+    
+    /* Force visible scrollbar on all platforms */
+    #policiesList {
+      overflow-y: scroll !important;
+      scrollbar-width: thin !important;
+      scrollbar-color: #0072CE #F1F5F9 !important;
+    }
+    #policiesList::-webkit-scrollbar {
+      width: 6px !important;
+      display: block !important;
+      -webkit-appearance: none;
+    }
+    #policiesList::-webkit-scrollbar-track {
+      background: #F1F5F9 !important;
+      border-radius: 4px;
+    }
+    #policiesList::-webkit-scrollbar-thumb {
+      background: #0072CE !important;
+      border-radius: 4px;
+    }
+    #policiesList::-webkit-scrollbar-thumb:hover {
+      background: #002664 !important;
+    }
+  </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ========================================================================= -->
+  <!-- Top Marsh Navigation Bar -->
+  <!-- ========================================================================= -->
+  <header class="bg-marsh-navy text-white shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <div class="w-10 h-10 rounded-lg bg-marsh-blue flex items-center justify-center font-extrabold text-white text-xl tracking-wider shadow-inner">
+          M
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <h1 class="text-xl font-bold tracking-tight text-white">Marsh McLennan</h1>
+            <span class="text-xs px-2 py-0.5 rounded bg-marsh-blue text-white font-medium">India Knowledge Services</span>
+          </div>
+          <p class="text-xs text-slate-300">AI-Powered Pitch Generator & Factual Audit Platform</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-6 text-sm">
+        <div class="hidden md:flex items-center space-x-2 text-slate-300">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Model: <strong class="text-white">gemini-3.5-flash-lite</strong></span>
+        </div>
+        <div class="h-6 w-px bg-slate-700 hidden md:block"></div>
+        <div class="text-xs text-slate-300">
+          Clause Index: <span id="headerClauseCount" class="font-bold text-white">Loading...</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- Main Application Body -->
+  <!-- ========================================================================= -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow">
+
+    <!-- Top Alert / Notification Banner -->
+    <div id="statusAlert" class="hidden mb-6 p-4 rounded-xl border flex items-center space-x-3 text-sm"></div>
+
+    <!-- Inputs & Configuration Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10">
+      
+      <!-- Left Panel: Client Profile Input -->
+      <div class="lg:col-span-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="building-2" class="w-5 h-5 text-marsh-blue"></i>
+              <h2 class="text-lg font-bold text-marsh-dark">Client Target Specification</h2>
+            </div>
+            <span class="text-xs text-slate-400 font-medium">Step 1 of 3</span>
+          </div>
+
+          <p class="text-sm text-slate-500 mb-4">
+            Enter any prospective corporate client. The system infers workforce demographics, healthcare risks, and tailor-fits policy benefits.
+          </p>
+
+          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+            Target Company Name *
+          </label>
+          <div class="relative mb-3">
+            <input 
+              type="text" 
+              id="companyNameInput" 
+              placeholder="e.g., Infosys, Tata Consultancy Services, Zomato"
+              class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-marsh-blue focus:border-marsh-blue outline-none text-slate-800 text-sm font-medium transition"
+            >
+          </div>
+
+          <!-- Quick presets -->
+          <div class="flex items-center space-x-2 mb-6">
+            <span class="text-xs text-slate-400">Presets:</span>
+            <button onclick="setCompany('Infosys')" class="text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium transition">Infosys</button>
+            <button onclick="setCompany('Tata Consultancy Services')" class="text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium transition">TCS</button>
+            <button onclick="setCompany('Zomato')" class="text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium transition">Zomato</button>
+            <button onclick="setCompany('Dr. Reddy\'s Laboratories')" class="text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium transition">Dr. Reddy's</button>
+          </div>
+        </div>
+
+        <div>
+          <button 
+            id="generateBtn" 
+            onclick="startPipeline()" 
+            class="w-full py-3.5 bg-marsh-navy hover:bg-slate-900 text-white font-semibold rounded-xl shadow-md transition flex items-center justify-center space-x-2 text-sm"
+          >
+            <i data-lucide="sparkles" class="w-4 h-4 text-sky-300"></i>
+            <span>Generate Grounded Pitch & Run Audit</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Panel: Policy Selection & Document Upload -->
+      <div class="lg:col-span-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="file-check-2" class="w-5 h-5 text-marsh-blue"></i>
+              <h2 class="text-lg font-bold text-marsh-dark">Policy Baseline & Upload</h2>
+            </div>
+            <span class="text-xs text-slate-400 font-medium">Grounding Source</span>
+          </div>
+
+          <p class="text-sm text-slate-500 mb-3">
+            Select policy documents to ground the pitch in, or upload a new policy brochure (.pdf) to index dynamically.
+          </p>
+
+          <!-- Checkbox List of Available Policies with visible scrollbar -->
+          <div id="policiesList" class="space-y-2 mb-2 max-h-36 overflow-y-scroll pr-2 border border-slate-200 rounded-xl p-2 bg-slate-50/50">
+            <div class="text-xs text-slate-400 py-2">Loading policy documents...</div>
+          </div>
+          <!-- Policy Count & Scroll Indicator -->
+          <div id="policyOverflowNote" class="flex items-center justify-between text-[11px] text-slate-500 mb-3 px-1">
+            <span id="policySelectedSummary">Loading baseline policies...</span>
+            <span id="policyScrollNotice" class="font-semibold text-marsh-blue flex items-center space-x-1">
+              <span>↓ Scroll to view all</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Drag-and-drop / Upload Box -->
+        <div class="border-2 border-dashed border-slate-300 hover:border-marsh-blue rounded-xl p-3 bg-slate-50 transition text-center relative">
+          <input 
+            type="file" 
+            id="policyFileInput" 
+            accept=".pdf" 
+            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            onchange="handleFileUpload(event)"
+          >
+          <div class="flex items-center justify-center space-x-2 text-xs text-slate-600">
+            <i data-lucide="upload-cloud" class="w-4 h-4 text-marsh-blue"></i>
+            <span class="font-medium">Upload new policy PDF</span>
+            <span class="text-slate-400">(Auto-chunked & indexed)</span>
+          </div>
+          <div id="uploadFeedback" class="text-xs mt-1 font-medium hidden"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- Processing Stepper (Visible during generation) -->
+    <!-- ========================================================================= -->
+    <div id="stepperContainer" class="hidden mb-10 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center space-x-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-marsh-blue animate-ping"></span>
+          <span>Pipeline In Progress</span>
+        </h3>
+        <span id="stepperTimer" class="text-xs text-slate-400 font-mono">Running...</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-medium text-slate-600">
+        <div id="step-profile" class="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="step-icon w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold">1</div>
+          <span>Client Risk Profile</span>
+        </div>
+        <div id="step-pitch" class="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="step-icon w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold">2</div>
+          <span>Pitch Synthesis</span>
+        </div>
+        <div id="step-audit" class="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="step-icon w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold">3</div>
+          <span>Two-Step Factual Audit</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- Results Workspace (Tabs) -->
+    <!-- ========================================================================= -->
+    <div id="resultsWorkspace" class="hidden space-y-6">
+
+      <!-- Action & Summary Ribbon -->
+      <div class="bg-marsh-navy text-white p-6 rounded-2xl shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center space-x-3">
+            <h2 id="resultCompanyName" class="text-2xl font-bold tracking-tight text-white">Target Company</h2>
+            <span id="resultAuditBadge" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+              Audit Pending
+            </span>
+          </div>
+          <p id="resultRecommendedSummary" class="text-sm text-slate-300 mt-1">
+            Recommended Policy: Loading...
+          </p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <button 
+            id="downloadAuditPdfBtn" 
+            onclick="downloadAuditPdf()"
+            class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold rounded-xl shadow transition flex items-center space-x-2 border border-slate-700 cursor-pointer"
+          >
+            <i data-lucide="file-check-2" class="w-4 h-4 text-emerald-400"></i>
+            <span id="downloadAuditPdfLabel">Download Audit Report (.pdf)</span>
+          </button>
+          <button 
+            id="downloadPptxBtn" 
+            onclick="downloadPptx()"
+            class="px-4 py-2.5 bg-marsh-blue hover:bg-sky-600 text-white text-sm font-semibold rounded-xl shadow transition flex items-center space-x-2 cursor-pointer"
+          >
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span id="downloadPptxLabel">Download Pitch Deck (.pptx)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="flex border-b border-slate-200 space-x-4">
+        <button onclick="switchTab('slides')" id="tab-btn-slides" class="py-3 px-4 font-semibold text-sm border-b-2 border-marsh-navy text-marsh-navy flex items-center space-x-2">
+          <i data-lucide="presentation" class="w-4 h-4"></i>
+          <span>Slide Deck Preview</span>
+        </button>
+        <button onclick="switchTab('audit')" id="tab-btn-audit" class="py-3 px-4 font-medium text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center space-x-2">
+          <i data-lucide="shield-check" class="w-4 h-4"></i>
+          <span>Compliance & Audit Report</span>
+          <span id="auditTabFlagCount" class="text-xs px-2 py-0.5 rounded-full bg-slate-200 font-bold">0</span>
+        </button>
+        <button onclick="switchTab('profile')" id="tab-btn-profile" class="py-3 px-4 font-medium text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center space-x-2">
+          <i data-lucide="briefcase" class="w-4 h-4"></i>
+          <span>Company Risk Profile</span>
+        </button>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- TAB 1: Slide Deck Preview Carousel -->
+      <!-- ========================================================================= -->
+      <div id="tab-content-slides" class="space-y-6">
+        
+        <!-- Slide Viewer Carousel Card -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          
+          <!-- Slide Header Bar -->
+          <div class="bg-marsh-navy px-6 py-4 flex items-center justify-between text-white border-b-4 border-marsh-sky">
+            <div>
+              <span id="currentSlideTracker" class="text-xs uppercase tracking-wider text-marsh-sky font-bold">Slide 1 of 5</span>
+              <h3 id="currentSlideTitle" class="text-lg font-bold text-white mt-0.5">Slide Title</h3>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="prevSlide()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-white transition">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+              </button>
+              <button onclick="nextSlide()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-white transition">
+                <i data-lucide="chevron-right" class="w-5 h-5"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Slide Content Body (Executive Card layout) -->
+          <div class="p-8 min-h-[360px] flex flex-col justify-between">
+            <div id="currentSlideBullets" class="space-y-4">
+              <!-- Rendered bullets as cards -->
+            </div>
+
+            <div class="mt-8 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+              <span>MARSH MCLENNAN | Client Advisory Pitch Deck</span>
+              <span id="slideFooterNote">Grounded in IRDAI Health Insurance Policies</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Slide Thumbnails Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3" id="slideThumbsGrid">
+          <!-- Dynamically populated thumbnails -->
+        </div>
+
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- TAB 2: Compliance & Audit Report -->
+      <!-- ========================================================================= -->
+      <div id="tab-content-audit" class="hidden space-y-6">
+        
+        <!-- Audit KPI Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs text-slate-400 uppercase font-semibold">Overall Audit Status</span>
+            <div id="kpiAuditStatus" class="text-xl font-extrabold text-slate-800 mt-1 uppercase">PASS</div>
+            <span id="kpiStatusDesc" class="text-xs text-slate-500 mt-0.5 block">Meets advisory standards</span>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs text-slate-400 uppercase font-semibold">Confidence Score</span>
+            <div id="kpiConfidenceScore" class="text-xl font-extrabold text-marsh-blue mt-1">94%</div>
+            <span class="text-xs text-slate-500 mt-0.5 block">Grounded verification ratio</span>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs text-slate-400 uppercase font-semibold">Verified Claims</span>
+            <div id="kpiVerifiedCount" class="text-xl font-extrabold text-emerald-600 mt-1">12 / 12</div>
+            <span class="text-xs text-slate-500 mt-0.5 block">Matched to source clauses</span>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs text-slate-400 uppercase font-semibold">Flagged for Review</span>
+            <div id="kpiFlaggedCount" class="text-xl font-extrabold text-amber-500 mt-1">0</div>
+            <span class="text-xs text-slate-500 mt-0.5 block">Require advisor approval</span>
+          </div>
+        </div>
+
+        <!-- Advisor Action & Approval Gate -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 text-marsh-blue flex items-center justify-center font-bold">
+              <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h4 class="text-sm font-bold text-marsh-dark">Advisor Decision Gate</h4>
+              <p class="text-xs text-slate-500">Every benefit figure is verified against IRDAI source filings before sending to client.</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button onclick="approvePitch()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-sm transition">
+              Approve for Client Delivery
+            </button>
+            <button onclick="rejectPitch()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg shadow-sm transition">
+              Reject / Re-Run
+            </button>
+          </div>
+        </div>
+
+        <!-- Flagged Claims List -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <h3 class="text-base font-bold text-marsh-dark mb-4 flex items-center space-x-2">
+            <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500"></i>
+            <span>Traceability & Claim Verification Log</span>
+          </h3>
+          <div id="flaggedClaimsContainer" class="space-y-3">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- TAB 3: Company Risk Profile -->
+      <!-- ========================================================================= -->
+      <div id="tab-content-profile" class="hidden space-y-6">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <!-- Profile Overview -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <h3 class="text-base font-bold text-marsh-dark flex items-center space-x-2">
+              <i data-lucide="info" class="w-5 h-5 text-marsh-blue"></i>
+              <span>Corporate Demographics</span>
+            </h3>
+            
+            <div class="space-y-3 text-sm">
+              <div class="flex justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500">Entity Name:</span>
+                <span id="profCompanyName" class="font-semibold text-slate-800">-</span>
+              </div>
+              <div class="flex justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500">Primary Industry:</span>
+                <span id="profIndustry" class="font-semibold text-slate-800">-</span>
+              </div>
+              <div class="flex justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500">Workforce Headcount:</span>
+                <span id="profSize" class="font-semibold text-slate-800">-</span>
+              </div>
+              <div class="flex justify-between py-2">
+                <span class="text-slate-500">Grounding Source:</span>
+                <span id="profDataSource" class="font-semibold text-emerald-700 text-xs px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200">Wikipedia</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Explicit Assumptions -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <h3 class="text-base font-bold text-marsh-dark flex items-center space-x-2">
+              <i data-lucide="alert-circle" class="w-5 h-5 text-amber-500"></i>
+              <span>Documented Assumptions (No Silent Guessing)</span>
+            </h3>
+            <div id="profAssumptions" class="space-y-2 text-xs">
+              <!-- Populated via JS -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Inferred Key Health Risks -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <h3 class="text-base font-bold text-marsh-dark mb-3 flex items-center space-x-2">
+            <i data-lucide="heart-pulse" class="w-5 h-5 text-rose-500"></i>
+            <span>Health & Operational Exposure Dynamics</span>
+          </h3>
+          <p class="text-xs text-slate-500 mb-4">
+            These risks represent health exposure patterns characteristic of this client's industry and workforce model.
+          </p>
+          <div id="profRisksList" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- Footer -->
+  <!-- ========================================================================= -->
+  <footer class="bg-white border-t border-slate-200 py-6 mt-12 text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div>
+        Marsh India Insurance Brokers Pvt. Ltd. | Licensed by IRDAI | For Internal Advisory Use Only
+      </div>
+      <div class="flex items-center space-x-4">
+        <span>Grounded in Active Policy Filings</span>
+        <span>•</span>
+        <span>FastAPI + Gemini Flash Architecture</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Clause Inspector Drawer Modal -->
+  <div id="clauseModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between border-b pb-3">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="file-text" class="w-5 h-5 text-marsh-blue"></i>
+          <h3 id="modalClauseTitle" class="text-base font-bold text-marsh-dark">Clause Inspector</h3>
+        </div>
+        <button onclick="closeClauseModal()" class="text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="modalClauseBody" class="text-sm text-slate-700 leading-relaxed max-h-80 overflow-y-auto bg-slate-50 p-4 rounded-xl border border-slate-200">
+        Clause content...
+      </div>
+      <div class="flex justify-end pt-2">
+        <button onclick="closeClauseModal()" class="px-4 py-2 bg-slate-800 text-white text-xs font-semibold rounded-lg hover:bg-slate-900 transition">
+          Close Inspector
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js?v=2.2"></script>
+</body>
+</html>
