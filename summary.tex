@@ -1,9 +1,11 @@
 \documentclass[11pt,a4paper]{article}
 
 \usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 \usepackage[margin=1in]{geometry}
 \usepackage{hyperref}
 \usepackage{booktabs}
+\usepackage{tabularx}
 \usepackage{xcolor}
 \usepackage{amsmath}
 \usepackage{enumitem}
@@ -15,8 +17,6 @@
 \definecolor{marshblue}{HTML}{0072CE}
 \definecolor{marshsky}{HTML}{00A3E0}
 \definecolor{marshdark}{HTML}{0F172A}
-\definecolor{slateborder}{HTML}{E2E8F0}
-\definecolor{cardbg}{HTML}{F8FAFC}
 
 \hypersetup{
     colorlinks=true,
@@ -45,13 +45,13 @@
 The \textbf{Marsh Pitch Generator} is an executive-grade AI advisory application that automates the synthesis of customized corporate insurance marketing pitch decks. Grounded in IRDAI-approved health insurance policy filings and verified public corporate records, the system enforces a zero-hallucination compliance standard via an automated two-step factual verification engine. This document provides a technical summary of the engineering approach, tooling choices, end-to-end architecture, and key design decisions implemented in the platform.
 \end{abstract}
 
-\vspace{0.8em}
+\vspace{0.5em}
 
 % ---------------------------------------------------------------------------
 \section{Approach \& Methodology}
 % ---------------------------------------------------------------------------
 
-Corporate insurance advisory requires synthesizing complex policy brochures into persuasive, client-specific marketing decks while maintaining strict regulatory veracity. The platform approaches this challenge through four foundational tenets:
+Corporate insurance advisory requires synthesizing complex policy brochures into persuasive, client-specific marketing decks while maintaining strict regulatory veracity. The platform approaches this challenge through five foundational tenets:
 
 \begin{enumerate}
     \item \textbf{Dual-Source Grounding:} Separates client corporate context from insurance benefit claims. Entity demographics and operational exposures are grounded via the public \textbf{Wikipedia REST API} (avoiding hallucinated corporate facts), while policy benefits, waiting periods, and sums insured are bound to parsed IRDAI policy filings.
@@ -70,19 +70,19 @@ The stack is designed for minimal operational complexity, native local execution
 \begin{table}[h!]
 \centering
 \small
-\begin{tabular}{@{}lll@{}}
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
 \toprule
-\textbf{Component} & \textbf{Library / Technology} & \textbf{Technical Purpose} \\ \midrule
-\textbf{Backend Framework} & FastAPI + Uvicorn & Async REST API serving, CORS handling, and file streaming \\
-\textbf{LLM Engine} & Google Generative AI SDK & Structured JSON generation via \texttt{gemini-3.5-flash-lite} \\
-\textbf{Corporate Grounding} & Wikipedia REST API & Keyless real-time retrieval of corporate overview \& headcount \\
-\textbf{PDF Document Ingestion} & pdfplumber ($\ge 0.11$) & Exact text \& layout extraction from IRDAI brochure PDFs \\
+\textbf{Component} & \textbf{Library / Tool} & \textbf{Technical Purpose} \\ \midrule
+\textbf{Backend Framework} & FastAPI + Uvicorn & High-performance asynchronous REST API and file streaming \\
+\textbf{LLM Engine} & Google Generative AI & Structured JSON generation via \texttt{gemini-3.5-flash-lite} \\
+\textbf{Corporate Grounding} & Wikipedia REST API & Keyless real-time retrieval of corporate overview \& scale \\
+\textbf{PDF Ingestion} & pdfplumber ($\ge 0.11$) & Exact text \& layout extraction from IRDAI brochure PDFs \\
 \textbf{Fuzzy Verification} & RapidFuzz ($\ge 3.9$) & Token sort \& partial ratio string similarity computation \\
 \textbf{Presentation Export} & python-pptx ($\ge 1.0$) & Dynamic 16:9 widescreen corporate slide deck compilation \\
-\textbf{Compliance Audit Export} & ReportLab ($\ge 4.2$) & Multi-page tabular compliance matrix \& executive PDF generation \\
+\textbf{Compliance Audit} & ReportLab ($\ge 4.2$) & Multi-page tabular compliance matrix \& executive PDF generation \\
 \textbf{Schema Validation} & Pydantic (v2) + JSONSchema & Strict response schema enforcement and retry handling \\
-\textbf{Frontend Architecture} & Tailwind CSS + Vanilla ES6 & Responsive UI, custom scrollbars, Lucide icons \& carousel \\ \bottomrule
-\end{tabular}
+\textbf{Frontend Studio} & Tailwind CSS + Vanilla JS & Responsive UI, custom scrollbars, Lucide icons \& carousel \\ \bottomrule
+\end{tabularx}
 \end{table}
 
 % ---------------------------------------------------------------------------
@@ -95,29 +95,29 @@ The application follows an asynchronous client-server pipeline orchestrated thro
 \centering
 \small
 \begin{verbatim}
-[Client Query] ──▶ 1. Entity Profiling (Wikipedia REST API + Gemini Fallback)
-                          │
-                          ▼
-                   2. Policy Baseline Indexing (pdfplumber Heading Chunks)
-                          │
-                          ▼
-                   3. Pitch Deck Synthesis (Strict source_chunk_id Tagging)
-                          │
-                          ▼
-                   4. Two-Step Factual Audit Gate (RapidFuzz + LLM Escalation)
-                          │
-                          ▼
-                   5. On-Demand Lazy Downloads (Direct In-Memory Blob Streaming)
-                        ├──▶ PowerPoint Presentation (.pptx)
-                        └──▶ Compliance Audit Report (.pdf)
+[Client Query] ---> 1. Entity Profiling (Wikipedia REST API + Gemini Fallback)
+                           |
+                           v
+                    2. Policy Baseline Indexing (pdfplumber Heading Chunks)
+                           |
+                           v
+                    3. Pitch Deck Synthesis (Strict source_chunk_id Tagging)
+                           |
+                           v
+                    4. Two-Step Factual Audit Gate (RapidFuzz + LLM Escalation)
+                           |
+                           v
+                    5. On-Demand Lazy Downloads (Direct In-Memory Blob Streaming)
+                         +---> PowerPoint Presentation (.pptx)
+                         +---> Compliance Audit Report (.pdf)
 \end{verbatim}
 \end{figure}
 
 \begin{enumerate}
-    \item \textbf{Ingestion \& Indexing Engine (\texttt{parse\_policy\_docs.py}):} Extracts text from baseline brochures (\textit{Aditya Birla Activ One}, \textit{Care Health Advantage}, \textit{HDFC ERGO Optima Secure+}, and \textit{Niva Bupa ReAssure 2.0}), chunking content by semantic section headings into \texttt{chunks.json}. Supports dynamic runtime drag-and-drop PDF uploads via \texttt{/api/upload-policy}.
-    \item \textbf{Corporate Profiling Module (\texttt{generate\_company\_profile.py}):} Queries the Wikipedia search API. Applies a string similarity filter ($\text{token\_set\_ratio} \ge 60$) to filter spurious hits. Passes verified corporate context to Gemini 3.5 Flash-Lite to infer headcount, industry classification, and corporate health risk exposures.
+    \item \textbf{Ingestion \& Indexing Engine (\texttt{parse\_policy\_docs.py}):} Extracts text from baseline brochures (\textit{Aditya Birla}, \textit{Care Health}, \textit{HDFC ERGO}, and \textit{Niva Bupa}), chunking content by semantic section headings into \texttt{chunks.json}. Supports dynamic runtime drag-and-drop PDF uploads via \texttt{/api/upload-policy}.
+    \item \textbf{Corporate Profiling Module (\texttt{generate\_company\_profile.py}):} Queries the Wikipedia search API with string similarity filtering ($\text{token\_set\_ratio} \ge 60$) to reject spurious matches. Passes verified facts to Gemini 3.5 Flash-Lite to infer headcount, industry, and corporate health risk exposures.
     \item \textbf{Pitch Deck Generator (\texttt{generate\_marketing\_pitch.py}):} Synthesizes an executive 3--5 slide pitch mapped to the client's exposures. Every bullet detailing coverage terms must cite a valid \texttt{source\_chunk\_id}; unsourced claims are set to \texttt{null}. Replaces raw PDF filenames with commercial insurer names.
-    \item \textbf{Two-Step Audit Engine (\texttt{audit\_pitch\_content.py}):} Computes the claim confidence score:
+    \item \textbf{Two-Step Audit Engine (\texttt{audit\_pitch\_content.py}):} Evaluates claim confidence:
     \begin{equation*}
         \text{Confidence Score} = \frac{\text{Verified Policy Claims}}{\text{Total Sourced Policy Claims}}
     \end{equation*}
